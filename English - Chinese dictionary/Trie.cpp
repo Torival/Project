@@ -4,10 +4,6 @@
 #include "Trie.h"
 
 using namespace std;
-using std::ifstream;
-using std::cerr;
-using std::endl;
-using std::ios;
 
 Trie::Trie(const char* path) {
     root = new TrieNode();
