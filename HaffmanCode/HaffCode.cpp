@@ -7,11 +7,6 @@
 #include "HaffCode.h"
 
 using namespace std;
-using std::ifstream;
-using std::vector;
-using std::cout;
-using std::endl;
-using std::ios;
 
 HaffCode::HaffCode(string &inputPath) {
     string haff = encode(inputPath);
