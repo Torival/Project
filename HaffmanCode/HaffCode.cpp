@@ -24,7 +24,6 @@ string HaffCode::encode(string &inputPath) {
         vector<Node*> tree = countCharacter(inputPath);
         buildHuffTree(tree);
         for(map<char, string>::iterator it = entable.begin(); it!=entable.end(); it++) {
-            detable[it->second] = it->first;
             //²âÊÔÊä³öhuffman±àÂë 
             cout << (char)it->first << " -> " << it->second << endl;
         }

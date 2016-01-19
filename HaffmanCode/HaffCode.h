@@ -36,7 +36,6 @@ class HaffCode {
         string encodeFile(string &inputPath);
         
         //.haff -> .txt decode
-        map<string, char> detable;
         string decodeFile(string &inputPath);
 };
 #endif
