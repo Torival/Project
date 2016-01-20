@@ -154,11 +154,9 @@ string HaffCode::decodeFile(string &inputPath) {
     int count = 0;
     
     while(in.read(&buffer, 1)) { 
-        for(int j=0; j<8; j++) {            
-            if(detable.find(temp) != detable.end()) {
-                out << detable[temp];
-                temp = "", j--;
-            } else {
+        for(int j=0; j<8; j++) { 
+           //TODO        
+           } else {
                 if((buffer >> (7 - j)) & 1) temp += "1";
                 else temp += "0";
             }
