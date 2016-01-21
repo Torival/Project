@@ -11,8 +11,6 @@ using namespace std;
 HaffCode::HaffCode(string &inputPath) {
     string haff = encode(inputPath);
     string out = decode(haff);
-    cout << endl << "压缩后的路径为：" << haff << endl;
-    cout << "解压后的路径为：" << out << endl;
 }
 
 HaffCode::~HaffCode() {
