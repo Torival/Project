@@ -2,7 +2,6 @@
 #include <iostream>
 #include <istream>
 #include <fstream>
-#include <cstring>
 #include <vector>
 #include "HaffCode.h"
 
@@ -19,15 +18,11 @@ HaffCode::~HaffCode() {
 
 string HaffCode::encode(string &inputPath) {
     try{
-        vector<Node*> tree = countCharacter(inputPath);
-        buildHuffTree(tree);
-        for(map<char, string>::iterator it = entable.begin(); it!=entable.end(); it++) {
-            //≤‚ ‘ ‰≥ˆhuffman±‡¬Î 
-            cout << (char)it->first << " -> " << it->second << endl;
-        }
+        countCharacter(inputPath);
+        buildHuffTree();
         return encodeFile(inputPath);     
     } catch(const char * s) {
-        cout << s << endl;
+        cerr << s << endl;
         exit(1);
     } 
 }
@@ -37,43 +32,40 @@ string HaffCode::decode(string &inputPath) {
     return decodeFile(inputPath);
 }
 
-vector<Node*> HaffCode::countCharacter(string &inputPath) {
+void HaffCode::countCharacter(string &inputPath) {
     ifstream in(inputPath.c_str(), ios::in);
     if(!inputPath.length()) throw "path is NULL";
     if(! in.is_open()) throw "Error opening file";
     
     int count[128] = {0};
-    vector<Node*> vec;
     while(!in.eof()) {
         count[in.get()]++;
     }
     
     for(int i=0; i<128; i++) {
-        if(count[i]) vec.push_back(new Node(count[i],i));
+        if(count[i]) huffTree.push_back(new Node(count[i],i));
     }
-    return vec;
 }
 
-void HaffCode::buildHuffTree(vector<Node*> &tree) { 
-    int count = tree.size();
+void HaffCode::buildHuffTree() { 
+    int count = huffTree.size();
     int first, second;
     for(int i=0; i<count - 1; i++) {
-        selectMin(tree, first, second); 
-        tree.push_back(new Node((*tree[first]).weight + (*tree[second]).weight));
-        (*tree[first]).parent = tree.size()-1;
-        (*tree[second]).parent = tree.size()-1;
-        (*tree[tree.size()-1]).lchild = first;
-        (*tree[tree.size()-1]).rchild = second;
+        selectMin(first, second); 
+        huffTree.push_back(new Node((*huffTree[first]).weight + (*huffTree[second]).weight));
+        (*huffTree[first]).parent = huffTree.size()-1;
+        (*huffTree[second]).parent = huffTree.size()-1;
+        (*huffTree[huffTree.size()-1]).lchild = first;
+        (*huffTree[huffTree.size()-1]).rchild = second;
     }
     
-    buildHuffMap(tree, tree.size()-1, "");
 }
 
-void HaffCode::selectMin(vector<Node*>& tree, int& first, int& second) {
+void HaffCode::selectMin(int& first, int& second) {
     first = -1, second = -1;
     int flag = 0;
-    for(int i = 0; i < tree.size(); i++) {      
-        if((*tree[i]).parent == -1) {
+    for(int i = 0; i < huffTree.size(); i++) {      
+        if((*huffTree[i]).parent == -1) {
             if(!flag) {
                 if(first == -1) {         
                     first = i;
@@ -83,42 +75,34 @@ void HaffCode::selectMin(vector<Node*>& tree, int& first, int& second) {
                 }
             } else { 
                 //to deal 8, 5, 3
-                if((*tree[first]).weight > (*tree[second]).weight)
+                if((*huffTree[first]).weight > (*huffTree[second]).weight)
                     std::swap(first, second);
                 
                 //select second min
-                if((*tree[i]).weight < (*tree[second]).weight)
+                if((*huffTree[i]).weight < (*huffTree[second]).weight)
                     second = i;
                     
                 //select first min
-                if(second != i && (*tree[i]).weight < (*tree[first]).weight)      
+                if(second != i && (*huffTree[i]).weight < (*huffTree[first]).weight)      
                     first = i;
             }
         }
     }
 }
 
-void HaffCode::buildHuffMap(vector<Node*>& tree, int cur, string str) {
-    if((*tree[cur]).lchild == -1 && (*tree[cur]).rchild == -1) {
-        entable[(*tree[cur]).ch] = str;
-        return ;
-    }
-    if((*tree[cur]).lchild != -1) buildHuffMap(tree, (*tree[cur]).lchild, str+"0");
-    if((*tree[cur]).rchild != -1) buildHuffMap(tree, (*tree[cur]).rchild, str+"1");
-}
-
 string HaffCode::encodeFile(string &inputPath) {
+
     string outputPath = "./compression.haff";
     ofstream out(outputPath.c_str(), ios::out | ios ::binary);
     ifstream in(inputPath.c_str(), ios::in);
-    if(out.fail() || in.fail()) throw "Open File Exception";
+    if(in.fail()) throw "Open File Exception";
     
     unsigned char bit;
     string temp;
     int index = 0; 
         
     while(!in.eof()) {
-        temp = entable[in.get()];
+        temp = getBinary(in.get());
         while(temp.length()) {
             bit <<= 1;
             if(*temp.begin() == '1') bit |= 1;
@@ -147,22 +131,25 @@ string HaffCode::decodeFile(string &inputPath) {
     if(out.fail() || in.fail()) throw "Open File Exception";
 
     char buffer;
+    char ch;
     string temp = "";
-    int index = 0; 
-    int count = 0;
     
     while(in.read(&buffer, 1)) { 
         for(int j=0; j<8; j++) { 
-           //TODO        
+           ch = getChar(temp);
+           if(ch) {
+                out << ch;
+                temp = "";   
            } else {
                 if((buffer >> (7 - j)) & 1) temp += "1";
                 else temp += "0";
             }
         }
     }
-    if(detable.find(temp) != detable.end()) out << detable[temp];
     out.close();
     in.close();
     
     return outputPath;
 }
+
+
