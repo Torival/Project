@@ -11,8 +11,8 @@ using std::string;
 struct Node {
 	int weight;
 	char ch;
-	int lchild, rchild, parent;
-	Node(int weight, char ch = 0): lchild(-1), rchild(-1), parent(-1){ 
+	int left, right, parent;
+	Node(int weight, char ch = 0): left(-1), right(-1), parent(-1){ 
         this->weight = weight;
         this->ch = ch;
     }

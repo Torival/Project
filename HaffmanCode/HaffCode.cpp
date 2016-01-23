@@ -34,7 +34,6 @@ string HaffCode::decode(string &inputPath) {
 
 void HaffCode::countCharacter(string &inputPath) {
     ifstream in(inputPath.c_str(), ios::in);
-    if(!inputPath.length()) throw "path is NULL";
     if(! in.is_open()) throw "Error opening file";
     
     int count[128] = {0};
@@ -44,34 +43,37 @@ void HaffCode::countCharacter(string &inputPath) {
     
     for(int i=0; i<128; i++) {
         if(count[i]) huffTree.push_back(new Node(count[i],i));
+        else huffTree.push_back(NULL);
     }
 }
 
 void HaffCode::buildHuffTree() { 
-    int count = huffTree.size();
+    int count = 0;
+    int size = huffTree.size();
     int first, second;
+    
+    for(int i = 0; i< size; i++) 
+        if(huffTree[i]) count++;
+        
     for(int i=0; i<count - 1; i++) {
         selectMin(first, second); 
         huffTree.push_back(new Node((*huffTree[first]).weight + (*huffTree[second]).weight));
         (*huffTree[first]).parent = huffTree.size()-1;
         (*huffTree[second]).parent = huffTree.size()-1;
-        (*huffTree[huffTree.size()-1]).lchild = first;
-        (*huffTree[huffTree.size()-1]).rchild = second;
+        (*huffTree[huffTree.size()-1]).left = first;
+        (*huffTree[huffTree.size()-1]).right = second;
     }
-    
 }
 
 void HaffCode::selectMin(int& first, int& second) {
     first = -1, second = -1;
-    int flag = 0;
     for(int i = 0; i < huffTree.size(); i++) {      
-        if((*huffTree[i]).parent == -1) {
-            if(!flag) {
+        if(huffTree[i] && (*huffTree[i]).parent == -1) {
+            if(first == -1 || second == -1) {
                 if(first == -1) {         
                     first = i;
                 } else {
                     second = i;
-                    flag = 1;
                 }
             } else { 
                 //to deal 8, 5, 3
@@ -80,18 +82,13 @@ void HaffCode::selectMin(int& first, int& second) {
                 
                 //select second min
                 if((*huffTree[i]).weight < (*huffTree[second]).weight)
-                    second = i;
-                    
-                //select first min
-                if(second != i && (*huffTree[i]).weight < (*huffTree[first]).weight)      
-                    first = i;
+                    second = i;                    
             }
         }
     }
 }
 
 string HaffCode::encodeFile(string &inputPath) {
-
     string outputPath = "./compression.haff";
     ofstream out(outputPath.c_str(), ios::out | ios ::binary);
     ifstream in(inputPath.c_str(), ios::in);
@@ -102,12 +99,11 @@ string HaffCode::encodeFile(string &inputPath) {
     int index = 0; 
         
     while(!in.eof()) {
+        temp = "";
         temp = getBinary(in.get());
-        while(temp.length()) {
-            bit <<= 1;
-            if(*temp.begin() == '1') bit |= 1;
-            temp.erase(temp.begin());
-            index++;
+        for(int i = 0; i < temp.length(); i++) {
+            bit <<= 1, index++;
+            if(temp[i] == '1') bit |= 1;
             if(index == 8) {
                 out << bit;
                 index = 0;
@@ -120,7 +116,6 @@ string HaffCode::encodeFile(string &inputPath) {
     }
     out.close();
     in.close();
-    
     return outputPath;
 }
 
@@ -135,15 +130,13 @@ string HaffCode::decodeFile(string &inputPath) {
     string temp = "";
     
     while(in.read(&buffer, 1)) { 
-        for(int j=0; j<8; j++) { 
-           ch = getChar(temp);
-           if(ch) {
+        for(int j = 0; j < 8; j++) { 
+           if((ch = getChar(temp))) {
                 out << ch;
                 temp = "";   
-           } else {
-                if((buffer >> (7 - j)) & 1) temp += "1";
-                else temp += "0";
-            }
+           }
+           if((buffer >> (7 - j)) & 1) temp += "1";
+           else temp += "0";
         }
     }
     out.close();
@@ -152,4 +145,30 @@ string HaffCode::decodeFile(string &inputPath) {
     return outputPath;
 }
 
+string HaffCode::getBinary(char ch){
+    if(ch < 0) return "";
+    
+    string result = "";
+    int cur = ch;
+    int parent = 0;
+    
+    while((parent = (*huffTree[cur]).parent) != -1) {
+        if((*huffTree[parent]).right == cur) result += "1";
+        else result += "0";
+        cur = parent;
+    }
+    std::reverse(result.begin(), result.end());
+    return result;
+}
 
+char HaffCode::getChar(string str) {
+    int index = huffTree.size() - 1;
+    int len = str.length();
+    
+    for(int i = 0; i < len; i++) {
+        if(str[i] == '1') index = (*huffTree[index]).right;
+        else index = (*huffTree[index]).left;
+    }
+    
+    return (*huffTree[index]).ch;
+}
