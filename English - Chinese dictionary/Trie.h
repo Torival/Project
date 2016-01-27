@@ -5,9 +5,7 @@
 #include <vector>
 #include "TrieNode.h"
 
-using std::string;
-using std::vector;
-using std::pair;
+using namespace std;
 
 class Trie {
     public:

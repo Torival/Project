@@ -2,7 +2,7 @@
 #include <iostream>
 #include "TrieNode.h"
 
-using std::string;
+using namespace std;
 
 TrieNode::TrieNode(char c): info(NULL), ch(c), next(0) {
 }

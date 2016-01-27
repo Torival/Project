@@ -3,7 +3,7 @@
 
 #include <vector>
 
-using std::vector;
+using namespace std;
 
 class TrieNode {
     public:

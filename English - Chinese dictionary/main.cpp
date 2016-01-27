@@ -2,9 +2,7 @@
 #include <iomanip>
 #include "Trie.h"
 
-using std::cin;
-using std::cout;
-using std::endl;
+using namespace std;
 
 char print();
 void menu(Trie* t);
