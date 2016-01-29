@@ -641,7 +641,6 @@ battery   n.电池
 battle   n.战斗，战役
 bay   n.海湾，湾
 bazaar   n.集市
-b.c.   (缩)公元前
 be   v.是，存在
 beach   n.海滩，湖滨
 bead   n.有孔小珠
