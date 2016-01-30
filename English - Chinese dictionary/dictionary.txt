@@ -703,7 +703,6 @@ bet   n.,v.打赌
 betray   v.背叛，泄露
 betrayal   n.背叛，暴露
 better   adj.更好的 adv.较好
-better-off   adj.经济情况较好的
 between   prep.在两者之间
 beverage   n.饮料
 beware   v.当心
